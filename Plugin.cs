@@ -6,6 +6,7 @@ using ScarletHooks.Data;
 using VampireCommandFramework;
 using ScarletHooks.Services;
 using ScarletHooks.Systems;
+using ScarletRCON.Shared;
 
 namespace ScarletHooks;
 

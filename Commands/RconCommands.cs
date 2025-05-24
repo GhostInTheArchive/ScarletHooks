@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using ScarletHooks.Data;
 using ScarletHooks.Services;
 using ScarletHooks.Systems;
+using ScarletRCON.Shared;
 
 namespace ScarletHooks.Commands;
 
