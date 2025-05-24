@@ -13,7 +13,6 @@ namespace ScarletHooks.Patches;
 [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
 public static class OnUserConnected_Patch {
 	public static void Postfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId) {
-		if (!Core.hasInitialized) Core.Initialize();
 		try {
 			var index = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
 			var client = __instance._ApprovedUsersLookup[index];
@@ -33,8 +32,6 @@ public static class OnUserConnected_Patch {
 [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]
 public static class OnUserDisconnected_Patch {
 	private static void Prefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId, ConnectionStatusChangeReason connectionStatusReason, string extraData) {
-		if (!Core.hasInitialized) Core.Initialize();
-
 		try {
 			var index = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
 			var client = __instance._ApprovedUsersLookup[index];
@@ -55,8 +52,6 @@ public class Destroy_TravelBuffSystem_Patch {
 	private static PrefabGUID netherCoffinGUID = new(722466953);
 
 	private static void Postfix(Destroy_TravelBuffSystem __instance) {
-		if (!Core.hasInitialized) Core.Initialize();
-
 		var entities = __instance.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PrefabGUID>(), ComponentType.ReadOnly<EntityOwner>()).ToEntityArray(Allocator.Temp);
 
 		try {

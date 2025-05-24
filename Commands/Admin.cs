@@ -9,7 +9,7 @@ namespace ScarletHooks.Commands;
 
 [CommandGroup("hooks")]
 public static class AdminCommands {
-  [Command("add")]
+  [Command("add", adminOnly: true)]
   public static void Add(ChatCommandContext ctx, string clanName) {
     if (string.IsNullOrEmpty(clanName)) {
       ctx.Reply("You must provide a clan name.".FormatError());
@@ -28,7 +28,7 @@ public static class AdminCommands {
     ctx.Reply("Don't forget to reload the webhooks after changing the webhook url.".Format());
   }
 
-  [Command("afp")]
+  [Command("afp", adminOnly: true)]
   public static void AddFromPlayer(ChatCommandContext ctx, string playerName) {
     if (!PlayerService.TryGetByName(playerName, out PlayerData playerData) || string.IsNullOrEmpty(playerData.ClanName)) {
       ctx.Reply($"Player '{playerName}' not found or does not belong to a clan.".FormatError());
@@ -49,7 +49,7 @@ public static class AdminCommands {
     ctx.Reply("Don't forget to reload the webhooks after changing the webhook url.".Format());
   }
 
-  [Command("remove")]
+  [Command("remove", adminOnly: true)]
   public static void Remove(ChatCommandContext ctx, string name) {
     string clanName = null;
 
@@ -72,7 +72,7 @@ public static class AdminCommands {
     ctx.Reply($"Clan ~{clanName}~ removed from the list of clans.".Format());
   }
 
-  [Command("reload settings", description: "Reload all settings.")]
+  [Command("reload settings", description: "Reload all settings.", adminOnly: true)]
   public static void RealodSettings(ChatCommandContext ctx) {
     Settings.Reload();
     ctx.Reply("~Settings reloaded.~".Format());
@@ -84,7 +84,7 @@ public static class AdminCommands {
     ctx.Reply("~Webhooks reloaded.~".Format());
   }
 
-  [Command("reload", description: "Reload all settings and webhooks.")]
+  [Command("reload", description: "Reload all settings and webhooks.", adminOnly: true)]
   public static void Realod(ChatCommandContext ctx) {
     Settings.Reload();
     MessageDispatchSystem.LoadFromFile();
@@ -92,7 +92,7 @@ public static class AdminCommands {
     ctx.Reply("~Settings and webhooks reloaded.~".Format());
   }
 
-  [Command("list", description: "List all webhooks.")]
+  [Command("list", description: "List all webhooks.", adminOnly: true)]
   public static void ListClanWebHookUrls(ChatCommandContext ctx) {
     ctx.Reply($"~Admin~: {Settings.Get<string>("AdminWebhookURL")}.".Format());
 
@@ -107,7 +107,7 @@ public static class AdminCommands {
     ctx.Reply($"Total webhook urls: ~{MessageDispatchSystem.ClanWebHookUrls.Count + 2}~.".Format());
   }
 
-  [Command("settings")]
+  [Command("settings", adminOnly: true)]
   public static void ChangeSettings(ChatCommandContext ctx, string settings, bool value) {
     if (!Settings.Has(settings)) {
       ctx.Reply($"~{settings}~ does not exist.".Format());
@@ -125,7 +125,7 @@ public static class AdminCommands {
     ctx.Reply($"~{settings}~ changed to ~{value}~.".Format());
   }
 
-  [Command("settings")]
+  [Command("settings", adminOnly: true)]
   public static void ShowSettings(ChatCommandContext ctx) {
     ctx.Reply("~Current settings:~".Format());
     ctx.Reply($"AdminWebhookURL: ~{Settings.Get<string>("AdminWebhookURL")}~".Format());
@@ -145,19 +145,19 @@ public static class AdminCommands {
     ctx.Reply($"PublicWhisperMessages: ~{Settings.Get<bool>("PublicWhisperMessages")}~".Format());
   }
 
-  [Command("start")]
+  [Command("start", adminOnly: true)]
   public static void Start(ChatCommandContext ctx) {
     MessageDispatchSystem.Initialize();
     ctx.Reply("~Message dispatch system started.~".Format());
   }
 
-  [Command("stop")]
+  [Command("stop", adminOnly: true)]
   public static void Stop(ChatCommandContext ctx) {
     MessageDispatchSystem.ForceShutdown();
     ctx.Reply("~Message dispatch system stopped.~".Format());
   }
 
-  [Command("forcestop")]
+  [Command("forcestop", adminOnly: true)]
   public static void ForceStop(ChatCommandContext ctx) {
     MessageDispatchSystem.ForceShutdown();
     ctx.Reply("~Message dispatch system stopped and cleared all cache.~".Format());

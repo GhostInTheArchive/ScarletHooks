@@ -28,6 +28,7 @@ public class Plugin : BasePlugin {
     Database.Initialize();
     MessageDispatchSystem.Initialize();
     CommandRegistry.RegisterAll();
+    RconCommandRegistrar.RegisterAll();
   }
 
   public override bool Unload() {
