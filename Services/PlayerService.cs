@@ -12,6 +12,7 @@ public static class PlayerService {
   public static readonly Dictionary<string, PlayerData> PlayerNames = [];
   public static readonly Dictionary<ulong, PlayerData> PlayerIds = [];
   public static readonly Dictionary<NetworkId, PlayerData> PlayerNetworkIds = [];
+  private static readonly List<PlayerData> UnnamedPlayers = [];
   public static readonly List<PlayerData> AllPlayers = [];
 
   public static void Initialize() {
@@ -44,22 +45,32 @@ public static class PlayerService {
   }
 
   public static void SetPlayerCache(Entity userEntity, bool isOffline = false) {
+    var networkId = userEntity.Read<NetworkId>();
     var userData = userEntity.Read<User>();
     var name = userData.CharacterName.ToString();
-    var networkId = userEntity.Read<NetworkId>();
 
     if (!PlayerIds.ContainsKey(userData.PlatformId)) {
       PlayerData newData = new();
-      PlayerNames[name.ToLower()] = newData;
-      PlayerIds[userData.PlatformId] = newData;
+
+      if (string.IsNullOrEmpty(name)) {
+        UnnamedPlayers.Add(newData);
+      } else {
+        PlayerNames[name.ToLower()] = newData;
+        newData.SetName(name);
+      }
+
       PlayerNetworkIds[networkId] = newData;
+      PlayerIds[userData.PlatformId] = newData;
       AllPlayers.Add(newData);
     }
 
     var playerData = PlayerIds[userData.PlatformId];
 
+    playerData.UserEntity = userEntity;
+
     if (!string.IsNullOrEmpty(playerData.Name) && playerData.Name != name) {
       PlayerNames.Remove(playerData.Name.ToLower());
+      playerData.SetName(name);
       PlayerNames[name.ToLower()] = playerData;
     }
 
@@ -68,11 +79,6 @@ public static class PlayerService {
       PlayerNetworkIds[networkId] = playerData;
     }
 
-    playerData.Name = name;
-    playerData.PlatformID = userData.PlatformId;
-    playerData.IsOnline = !isOffline && userData.IsConnected;
-    playerData.UserEntity = userEntity;
-    playerData.CharacterEntity = userData.LocalCharacter._Entity;
     playerData.NetworkId = networkId;
 
     if (isOffline) {
@@ -81,18 +87,6 @@ public static class PlayerService {
     } else {
       MessageDispatchSystem.HandleLoginMessage(playerData.Name, playerData.ClanName);
     }
-  }
-
-  public static void ClearOfflinePlayers() {
-    AllPlayers.RemoveAll(p => {
-      var remove = !p.IsOnline;
-
-      PlayerIds.Remove(p.PlatformID);
-      PlayerNames.Remove(p.Name.ToLower());
-      PlayerNetworkIds.Remove(p.UserEntity.Read<NetworkId>());
-
-      return remove;
-    });
   }
 
   public static List<PlayerData> GetAdmins() {
@@ -104,7 +98,22 @@ public static class PlayerService {
   }
 
   public static bool TryGetByName(string name, out PlayerData playerData) {
-    return PlayerNames.TryGetValue(name.ToLower(), out playerData);
+    if (PlayerNames.TryGetValue(name.ToLower(), out playerData)) {
+      return true;
+    }
+
+    if (UnnamedPlayers.Count == 0) return false;
+
+    playerData = UnnamedPlayers.FirstOrDefault(p => p.Name.ToLower() == name.ToLower());
+
+    var exist = playerData != null;
+
+    if (exist) {
+      PlayerNames[name.ToLower()] = playerData;
+      UnnamedPlayers.Remove(playerData);
+    }
+
+    return exist;
   }
 
   public static bool TryGetByNetworkId(NetworkId networkId, out PlayerData playerData) {

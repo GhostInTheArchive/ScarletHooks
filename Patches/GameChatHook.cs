@@ -6,6 +6,7 @@ using Unity.Collections;
 using System;
 using ScarletHooks.Systems;
 using ScarletHooks.Services;
+using System.Text.RegularExpressions;
 
 namespace ScarletHooks.Patches;
 
@@ -20,6 +21,10 @@ public static class ChatMessageSystem_Patch {
         var userData = __instance.EntityManager.GetComponentData<User>(fromData.User);
         var chatEventData = __instance.EntityManager.GetComponentData<ChatMessageEvent>(entity);
         var messageType = chatEventData.MessageType;
+        var content = chatEventData.MessageText.ToString();
+
+        // Skip some stealth messages used by UI mods
+        if (Regex.IsMatch(content, @"^\[\w+\]")) return;
 
         string clanName = null;
         string targetName = null;
@@ -32,7 +37,7 @@ public static class ChatMessageSystem_Patch {
           targetName = playerData.Name;
         }
 
-        MessageDispatchSystem.HandleMessage(content: chatEventData.MessageText.ToString(), playerName: userData.CharacterName.ToString(), messageType: messageType, clanName: clanName, targetName: targetName);
+        MessageDispatchSystem.HandleMessage(content, playerName: userData.CharacterName.ToString(), messageType: messageType, clanName: clanName, targetName: targetName);
       }
     } catch (Exception e) {
       Plugin.LogInstance.LogError($"An error occurred while processing chat message: {e.Message}");

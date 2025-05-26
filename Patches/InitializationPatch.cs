@@ -8,8 +8,8 @@ namespace ScarletHooks.Patches;
 [HarmonyPatch(typeof(SpawnTeamSystem_OnPersistenceLoad), nameof(SpawnTeamSystem_OnPersistenceLoad.OnUpdate))]
 public static class InitializationPatch {
   [HarmonyPostfix]
-  public static void OneShot_AfterLoad_InitializationPatch() {
+  public static void Postfix() {
     Core.Initialize();
-    Plugin.Harmony.Unpatch(typeof(SpawnTeamSystem_OnPersistenceLoad).GetMethod("OnUpdate"), typeof(InitializationPatch).GetMethod("OneShot_AfterLoad_InitializationPatch"));
+    Plugin.Harmony.Unpatch(typeof(SpawnTeamSystem_OnPersistenceLoad).GetMethod("OnUpdate"), typeof(InitializationPatch).GetMethod("Postfix"));
   }
 }
