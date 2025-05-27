@@ -40,7 +40,7 @@ public static class OnUserDisconnected_Patch {
 			var index = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
 			var client = __instance._ApprovedUsersLookup[index];
 
-			PlayerService.SetPlayerCache(client.UserEntity);
+			PlayerService.SetPlayerCache(client.UserEntity, true);
 		} catch (Exception e) {
 			Core.Log.LogError($"An error occurred while disconnecting player: {e.Message}");
 		}
