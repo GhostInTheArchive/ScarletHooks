@@ -9,7 +9,7 @@ namespace ScarletHooks.Commands;
 
 [CommandGroup("hooks")]
 public static class AdminCommands {
-  [Command("add", adminOnly: true)]
+  [Command("add", description: "Add a new clan to the list. The clan name is case-sensitive. If you are unsure, use 'hooks afp' to add from the player's name.", adminOnly: true)]
   public static void Add(ChatCommandContext ctx, string clanName) {
     if (string.IsNullOrEmpty(clanName)) {
       ctx.Reply("You must provide a clan name.".FormatError());

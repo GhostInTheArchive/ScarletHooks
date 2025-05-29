@@ -8,7 +8,7 @@ namespace ScarletHooks.Commands;
 
 [RconCommandCategory("ScarletHooks")]
 public class AdminRconCommands {
-  [RconCommand("add", "Add a new clan to the list. The clan name is case-sensitive, if you are unsure use 'scarlethooks.afp' add from the player's name.")]
+  [RconCommand("add", "Add a new clan to the list. The clan name is case-sensitive. If you are unsure, use 'scarlethooks.afp' to add from the player's name.")]
   public static string Add(string clanName) {
     if (string.IsNullOrEmpty(clanName)) {
       return "You must provide a clan name.";
