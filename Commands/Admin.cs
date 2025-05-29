@@ -78,7 +78,7 @@ public static class AdminCommands {
     ctx.Reply("~Settings reloaded.~".Format());
   }
 
-  [Command("reload webhooks", description: "Reload all webhooks.")]
+  [Command("reload webhooks", description: "Reload all webhooks.", adminOnly: true)]
   public static void RealodWebhooks(ChatCommandContext ctx) {
     MessageDispatchSystem.LoadFromFile();
     ctx.Reply("~Webhooks reloaded.~".Format());
@@ -153,7 +153,7 @@ public static class AdminCommands {
 
   [Command("stop", adminOnly: true)]
   public static void Stop(ChatCommandContext ctx) {
-    MessageDispatchSystem.ForceShutdown();
+    MessageDispatchSystem.Shutdown();
     ctx.Reply("~Message dispatch system stopped.~".Format());
   }
 

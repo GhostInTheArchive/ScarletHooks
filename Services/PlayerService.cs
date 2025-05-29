@@ -5,6 +5,7 @@ using Unity.Collections;
 using Unity.Entities;
 using System.Linq;
 using ScarletHooks.Systems;
+using System;
 
 namespace ScarletHooks.Services;
 
@@ -74,19 +75,31 @@ public static class PlayerService {
       PlayerNames[name.ToLower()] = playerData;
     }
 
-    if (playerData.NetworkId.IsValid && playerData.NetworkId != networkId) {
-      PlayerNetworkIds.Remove(playerData.NetworkId);
-      PlayerNetworkIds[networkId] = playerData;
-    }
-
     playerData.NetworkId = networkId;
 
+    PlayerNetworkIds[networkId] = playerData;
+
+    var now = DateTime.UtcNow;
+
     if (isOffline) {
+      bool isRecentDisconnect = playerData.DisconnectedSince != default && (now - playerData.DisconnectedSince).TotalSeconds < 10;
+      if (!isRecentDisconnect) {
+        MessageDispatchSystem.HandleLogoutMessage(playerData.Name, playerData.ClanName);
+      }
+
       PlayerNetworkIds.Remove(networkId);
-      MessageDispatchSystem.HandleLogoutMessage(playerData.Name, playerData.ClanName);
+      playerData.DisconnectedSince = now;
+      playerData.ConnectedSince = default;
     } else {
-      MessageDispatchSystem.HandleLoginMessage(playerData.Name, playerData.ClanName);
+      bool isRecentConnect = playerData.ConnectedSince != default && (now - playerData.ConnectedSince).TotalSeconds < 10;
+      if (!isRecentConnect) {
+        MessageDispatchSystem.HandleLoginMessage(playerData.Name, playerData.ClanName);
+      }
+
+      playerData.ConnectedSince = now;
+      playerData.DisconnectedSince = default;
     }
+
   }
 
   public static List<PlayerData> GetAdmins() {

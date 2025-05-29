@@ -1,6 +1,7 @@
 using Unity.Entities;
 using ProjectM.Network;
 using ProjectM;
+using System;
 
 namespace ScarletHooks.Data;
 
@@ -38,4 +39,6 @@ public class PlayerData {
       return clanTeam.Name.ToString();
     }
   }
+  public DateTime ConnectedSince;
+  public DateTime DisconnectedSince;
 }

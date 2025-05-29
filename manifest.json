@@ -1,6 +1,6 @@
 {
   "name": "ScarletHooks",
-  "version_number": "1.0.0",
+  "version_number": "1.0.2",
   "website_url": "https://github.com/markvaaz/ScarletHooks",
   "description": "Send your V Rising server chat messages straight to Discord (or any webhook)! Supports admin-only logs (all chat messages), public logs (global chat by default), and even clan-specific logs sent to their own webhooks.",
   "dependencies": [

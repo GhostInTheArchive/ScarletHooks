@@ -8,18 +8,18 @@ namespace ScarletHooks.Commands;
 
 [RconCommandCategory("ScarletHooks")]
 public class AdminRconCommands {
-  [RconCommand("add", "Add a new clan to the list.")]
+  [RconCommand("add", "Add a new clan to the list. The clan name is case-sensitive, if you are unsure use 'scarlethooks.afp' add from the player's name.")]
   public static string Add(string clanName) {
     if (string.IsNullOrEmpty(clanName)) {
       return "You must provide a clan name.";
     }
 
     if (MessageDispatchSystem.ClanWebHookUrls.ContainsKey(clanName)) {
-      return "This clan already exists, please go to the config file to change the webhook url.\nDon't forget to reload the webhooks after changing the webhook url.";
+      return "This clan already exists, please use the 'scarlethooks.setclanwebhook' command to change the webhook url.";
     }
 
     MessageDispatchSystem.AddClan(clanName);
-    return $"Clan {clanName} added to the list of clans, please go to the config file to set the webhook url.\nDon't forget to reload the webhooks after changing the webhook url.";
+    return $"Clan {clanName} added to the list of clans, please use the 'scarlethooks.setclanwebhook' command to set the webhook url.";
   }
 
   [RconCommand("afp", "Add a clan to the list using a player's name.")]
@@ -31,11 +31,11 @@ public class AdminRconCommands {
     string clanName = playerData.ClanName;
 
     if (MessageDispatchSystem.ClanWebHookUrls.ContainsKey(clanName)) {
-      return "This clan already exists, please go to the config file to change the webhook url.\nDon't forget to reload the webhooks after changing the webhook url.";
+      return "This clan already exists, please use the 'scarlethooks.setclanwebhook' command to change the webhook url.";
     }
 
     MessageDispatchSystem.AddClan(clanName);
-    return $"Clan {clanName} (from player '{playerName}') added to the list of clans, please go to the config file to set the webhook url.\nDon't forget to reload the webhooks after changing the webhook url.";
+    return $"Clan {clanName} (from player '{playerName}') added to the list of clans, please use the 'scarlethooks.setclanwebhook' command to set the webhook url.";
   }
 
   [RconCommand("remove", "Remove a clan from the list by clan or player name.")]
@@ -138,7 +138,7 @@ public class AdminRconCommands {
 
   [RconCommand("stop", "Stop the message dispatch system.")]
   public static string Stop() {
-    MessageDispatchSystem.ForceShutdown();
+    MessageDispatchSystem.Shutdown();
     return "Message dispatch system stopped.";
   }
 
@@ -146,5 +146,49 @@ public class AdminRconCommands {
   public static string ForceStop() {
     MessageDispatchSystem.ForceShutdown();
     return "Message dispatch system stopped and cleared all cache.";
+  }
+
+  [RconCommand("setadminwebhook", "Set the admin webhook URL.")]
+  public static string SetAdminWebhook(string url) {
+    if (string.IsNullOrEmpty(url)) {
+      return "You must provide a valid URL.";
+    }
+
+    Settings.Set("AdminWebhookURL", url);
+    return $"Admin webhook URL set to: {url}";
+  }
+
+  [RconCommand("setpublicwebhook", "Set the public webhook URL.")]
+  public static string SetPublicWebhook(string url) {
+    if (string.IsNullOrEmpty(url)) {
+      return "You must provide a valid URL.";
+    }
+
+    Settings.Set("PublicWebhookURL", url);
+    return $"Public webhook URL set to: {url}";
+  }
+
+  [RconCommand("setloginwebhook", "Set the login webhook URL.")]
+  public static string SetLoginWebhook(string url) {
+    if (string.IsNullOrEmpty(url)) {
+      return "You must provide a valid URL.";
+    }
+
+    Settings.Set("LoginWebhookURL", url);
+    return $"Login webhook URL set to: {url}";
+  }
+
+  [RconCommand("setclanwebhook", "Set the webhook URL for a specific clan.")]
+  public static string SetClanWebhook(string clanName, string url) {
+    if (string.IsNullOrEmpty(clanName) || string.IsNullOrEmpty(url)) {
+      return "You must provide a clan name and a valid URL.";
+    }
+
+    if (!MessageDispatchSystem.ClanWebHookUrls.ContainsKey(clanName)) {
+      return $"Clan {clanName} does not exist. Use the 'add' command to add it first.";
+    }
+
+    MessageDispatchSystem.ClanWebHookUrls[clanName] = url;
+    return $"Webhook URL for clan {clanName} set to: {url}";
   }
 }
