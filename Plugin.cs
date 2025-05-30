@@ -34,6 +34,7 @@ public class Plugin : BasePlugin {
 
   public override bool Unload() {
     CommandRegistry.UnregisterAssembly();
+    RconCommandRegistrar.UnregisterAssembly();
     _harmony?.UnpatchSelf();
     return true;
   }
