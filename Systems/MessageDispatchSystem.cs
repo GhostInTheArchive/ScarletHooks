@@ -7,18 +7,26 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ProjectM;
 using ProjectM.Network;
+using ScarletCore.Data;
+using ScarletCore.Events;
+using ScarletCore.Services;
+using ScarletCore.Utils;
 using ScarletHooks.Data;
-using ScarletHooks.Services;
+using Stunlock.Core;
 
 namespace ScarletHooks.Systems;
 
 public static class MessageDispatchSystem {
   private static readonly HttpClient _httpClient = new();
-
+  private static Settings Settings => Plugin.Settings;
+  private static Database Database => Plugin.Database;
   public static string AdminWebHookUrl => Settings.Get<string>("AdminWebhookURL");
   public static string PublicWebHookUrl => Settings.Get<string>("PublicWebhookURL");
   public static string LoginWebhookURL => Settings.Get<string>("LoginWebhookURL");
+  public static string PvpKillWebhookURL => Settings.Get<string>("PvpKillWebhookURL");
+  public static string VBloodWebhookURL => Settings.Get<string>("VBloodWebhookURL");
   public static float MessageInterval => Settings.Get<float>("MessageInterval");
   public static float OnFailInterval => Settings.Get<float>("OnFailInterval");
   public static bool EnableBatching => Settings.Get<bool>("EnableBatching");
@@ -34,6 +42,12 @@ public static class MessageDispatchSystem {
   public static void Initialize() {
     _isRunning = true;
     LoadFromFile();
+
+    EventManager.OnUserConnected += HandleConnectionEvent;
+    EventManager.OnUserDisconnected += HandleDisconnectionEvent;
+    EventManager.OnChatMessage += HandleMessageEvent;
+    EventManager.OnPlayerDeath += HandlePvpDeathEvent;
+    EventManager.OnVBloodDeath += HandleVBloodDeathEvent;
 
     _cts = new CancellationTokenSource();
     _ = Task.Run(() => ProcessQueueLoop(_cts.Token));
@@ -57,12 +71,116 @@ public static class MessageDispatchSystem {
   }
 
   public static void LoadFromFile() {
-    if (Database.FileExists("ClanWebHookUrls")) {
+    if (Database.Has("ClanWebHookUrls")) {
       ClanWebHookUrls = Database.Load<Dictionary<string, string>>("ClanWebHookUrls");
     }
   }
 
-  public static void HandleMessage(string content, string playerName, ChatMessageType messageType, string clanName, string targetName) {
+  public static void HandlePvpDeathEvent(object _, DeathEventArgs args) {
+    if (args == null || !_isRunning) return;
+
+    var deaths = args.Deaths;
+
+    foreach (var death in deaths) {
+      var died = death.Died;
+      var killer = death.Killer;
+
+      if (!died.Has<PlayerCharacter>() || !killer.Has<PlayerCharacter>()) continue;
+
+      if (!PlayerService.TryGetByName(died.Read<PlayerCharacter>().Name.ToString(), out var diedPlayer) ||
+          !PlayerService.TryGetByName(killer.Read<PlayerCharacter>().Name.ToString(), out var killerPlayer)) {
+        return;
+      }
+
+      var format = Settings.Get<string>("PvpKillMessageFormat");
+
+      var resultMessage = format
+        .Replace("{playerName}", killerPlayer.Name)
+        .Replace("{targetName}", diedPlayer.Name)
+        .Replace("[{clanName}]", $"[{killerPlayer.ClanName}]" ?? "")
+        .Replace("{clanName}", $"{killerPlayer.ClanName}" ?? "");
+
+
+      if (Settings.Get<bool>("AdminPvpMessages")) {
+        AddToQueue(AdminWebHookUrl, resultMessage);
+      }
+
+      if (Settings.Get<bool>("PublicPvpMessages")) {
+        AddToQueue(PublicWebHookUrl, resultMessage);
+      }
+
+      AddToQueue(PvpKillWebhookURL, resultMessage);
+    }
+  }
+
+  public static void HandleVBloodDeathEvent(object _, DeathEventArgs args) {
+    if (args == null || !_isRunning) return;
+
+    var deaths = args.Deaths;
+
+    foreach (var death in deaths) {
+      var died = death.Died;
+      var killer = death.Killer;
+
+      if (!killer.Has<PlayerCharacter>()) continue;
+
+      if (!PlayerService.TryGetByName(killer.Read<PlayerCharacter>().Name.ToString(), out var killerPlayer)) {
+        return;
+      }
+
+      var vBloodName = VBloods.Names[died.Read<PrefabGUID>().GuidHash];
+      var format = Settings.Get<string>("VBloodDeathMessageFormat");
+
+      var resultMessage = format
+        .Replace("{playerName}", killerPlayer.Name)
+        .Replace("{VBloodName}", vBloodName);
+
+      if (Settings.Get<bool>("AdminVBloodMessages")) {
+        AddToQueue(AdminWebHookUrl, resultMessage);
+      }
+
+      if (Settings.Get<bool>("PublicVBloodMessages")) {
+        AddToQueue(PublicWebHookUrl, resultMessage);
+      }
+
+      AddToQueue(VBloodWebhookURL, resultMessage);
+    }
+  }
+
+  private static void HandleConnectionEvent(object _, UserConnectedEventArgs args) {
+    if (args == null || !_isRunning) return;
+    var playerData = args.Player;
+    var now = DateTime.UtcNow;
+
+    bool isRecentConnect = (now - playerData.ConnectedSince).TotalSeconds < 10;
+    if (!isRecentConnect) {
+      HandleLoginMessage(playerData.Name, playerData.ClanName);
+    }
+
+    playerData.SetData(now);
+  }
+
+  private static void HandleDisconnectionEvent(object _, UserDisconnectedEventArgs args) {
+    var playerData = args.Player;
+    var now = DateTime.UtcNow;
+    var disconnectedSince = playerData.GetData<DateTime>();
+
+    bool isRecentDisconnect = disconnectedSince != default && (now - disconnectedSince).TotalSeconds < 10;
+
+    if (!isRecentDisconnect) {
+      HandleLogoutMessage(playerData.Name, playerData.ClanName);
+    }
+  }
+
+  public static void HandleMessageEvent(object _, ChatMessageEventArgs args) {
+    if (args == null || !_isRunning) return;
+
+    if (string.IsNullOrEmpty(args.Message) || string.IsNullOrEmpty(args.Sender.Name)) return;
+
+    HandleMessage(args.Message, args.Sender.Name, args.MessageType, args.Sender.ClanName, args.Receiver?.Name);
+  }
+
+  private static void HandleMessage(string content, string playerName, ChatMessageType messageType, string clanName, string targetName) {
     if (string.IsNullOrEmpty(content) || !_isRunning) return;
 
     switch (messageType) {
@@ -167,8 +285,7 @@ public static class MessageDispatchSystem {
       AddToQueue(PublicWebHookUrl, $"{prefix} {content}");
   }
 
-  private static void SendMessage(string content, string playerName, string clanName,
-                                string prefixKey, string adminSettingKey, string publicSettingKey) {
+  private static void SendMessage(string content, string playerName, string clanName, string prefixKey, string adminSettingKey, string publicSettingKey) {
     string prefix = BuildPrefix(prefixKey, playerName, clanName);
 
     if (Settings.Get<bool>(adminSettingKey))

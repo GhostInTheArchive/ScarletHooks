@@ -5,7 +5,7 @@ using HarmonyLib;
 using Unity.Collections;
 using System;
 using ScarletHooks.Systems;
-using ScarletHooks.Services;
+using ScarletCore.Services;
 using System.Text.RegularExpressions;
 
 namespace ScarletHooks.Patches;
@@ -37,7 +37,7 @@ public static class ChatMessageSystem_Patch {
           targetName = playerData.Name;
         }
 
-        MessageDispatchSystem.HandleMessage(content, playerName: userData.CharacterName.ToString(), messageType: messageType, clanName: clanName, targetName: targetName);
+        // MessageDispatchSystem.HandleMessage(content, playerName: userData.CharacterName.ToString(), messageType: messageType, clanName: clanName, targetName: targetName);
       }
     } catch (Exception e) {
       Plugin.LogInstance.LogError($"An error occurred while processing chat message: {e.Message}");

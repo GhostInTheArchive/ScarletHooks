@@ -1,6 +1,6 @@
 # ScarletHooks
 
-ScarletHooks is a V Rising server mod that enables advanced webhook integration for all chat and login/logout messages. It allows admins to configure multiple webhooks for admin, public, clan-specific, and dedicated login notifications, with fine-grained control over which message types are sent to each destination. Message formats and prefixes are fully customizable via the config file, supporting placeholders like `{playerName}`, `{clanName}`, and `{targetName}`. All features can be managed through in-game chat commands and configuration, including sending login/logout messages to dedicated webhooks.
+ScarletHooks is a V Rising server mod that enables advanced webhook integration for chat messages, login/logout events, PvP kills, and VBlood boss defeats. It allows admins to configure multiple webhooks for admin, public, clan-specific, and dedicated notifications, with fine-grained control over which message types are sent to each destination. Message formats and prefixes are fully customizable via the config file, supporting placeholders like `{playerName}`, `{clanName}`, and `{targetName}`. All features can be managed through in-game chat commands and configuration, including sending various event notifications to dedicated webhooks.
 
 **Notes:**
 * This mod only supports sending messages from the server to external webhooks. It does not support sending messages to the in-game chat from external sources, if you need that feature, please check out [ScarletRCON](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletRCON/).
@@ -9,7 +9,9 @@ ScarletHooks is a V Rising server mod that enables advanced webhook integration 
 
 ---
 
-## Added support for RCON Commands from ScarletRCON
+## Added new hooks
+- **PvP Kills**: Track player kills in PvP combat.
+- **VBlood Kills**: Track VBlood boss eliminations.
 
 ## Support & Donations
 
@@ -36,10 +38,11 @@ ScarletHooks is a V Rising server mod that enables advanced webhook integration 
 
 ### Requirements
 
-This mod requires the following dependencies:
+This mod requires the following dependencies to function correctly:
 
-* **[BepInEx](https://wiki.vrisingmods.com/user/bepinex_install.html)**
-* **[VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework/releases/tag/v0.10.0)**
+* **[BepInEx (RC2)](https://wiki.vrisingmods.com/user/bepinex_install.html)**
+* **[ScarletCore](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletCore/)**
+* **[VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)**
 
 Make sure both are installed and loaded **before** installing ScarletHooks.
 
@@ -58,7 +61,7 @@ Make sure both are installed and loaded **before** installing ScarletHooks.
    BepInEx/plugins/ScarletHooks.dll
    ```
 
-3. Ensure **VampireCommandFramework** is also installed in the `plugins` folder.
+3. Ensure **ScarletCore** and **VampireCommandFramework** are also installed in the `plugins` folder.
 4. Start or restart your server.
 
-## Join the [modding community on Discord](https://discord.com/invite/QG2FmueAG9).
+## Join the [V Rising Mod Community on Discord](https://vrisingmods.com/discord)

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using ScarletHooks.Data;
-using ScarletHooks.Services;
+using ScarletCore.Data;
+using ScarletCore.Services;
 using ScarletHooks.Systems;
 using ScarletRCON.Shared;
 
@@ -8,6 +8,7 @@ namespace ScarletHooks.Commands;
 
 [RconCommandCategory("ScarletHooks")]
 public class AdminRconCommands {
+  private static Settings Settings => Plugin.Settings;
   [RconCommand("add", "Add a new clan to the list. The clan name is case-sensitive. If you are unsure, use 'scarlethooks.afp' to add from the player's name.")]
   public static string Add(string clanName) {
     if (string.IsNullOrEmpty(clanName)) {
@@ -62,7 +63,7 @@ public class AdminRconCommands {
 
   [RconCommand("reload settings", "Reload the settings from the configuration file.")]
   public static string ReloadSettings() {
-    Settings.Reload();
+    Plugin.ReloadSettings();
     return "Settings reloaded.";
   }
 
@@ -74,7 +75,7 @@ public class AdminRconCommands {
 
   [RconCommand("reload", "Reload both settings and webhooks from the configuration file.")]
   public static string Reload() {
-    Settings.Reload();
+    Plugin.ReloadSettings();
     MessageDispatchSystem.LoadFromFile();
     return "Settings and webhooks reloaded.";
   }
@@ -189,6 +190,8 @@ public class AdminRconCommands {
     }
 
     MessageDispatchSystem.ClanWebHookUrls[clanName] = url;
+    Plugin.Database.Save("ClanWebHookUrls", MessageDispatchSystem.ClanWebHookUrls);
+
     return $"Webhook URL for clan {clanName} set to: {url}";
   }
 }

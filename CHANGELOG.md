@@ -1,4 +1,15 @@
 <details>
+<summary>Update 1.1.0</summary>
+
+- Added PvP kills hook to track player kills in PvP combat.
+- Added VBlood kills hook to track VBlood boss eliminations.
+- **Major Refactor**: Migrated most services and systems to use existing ScarletCore infrastructure.
+- Improved performance and reduced code duplication by leveraging ScarletCore's established systems.
+- Enhanced compatibility and stability through unified core architecture.
+- Reduced mod footprint and potential conflicts with other ScarletCore-based mods.
+</details>
+
+<details>
 <summary>Update 1.0.2</summary>
 
 - Improved the handling of login/logout messages to ensure they are sent only once per connection.

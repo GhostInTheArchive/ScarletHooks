@@ -1,14 +1,13 @@
 using System;
 using System.Runtime.InteropServices;
 using Il2CppInterop.Runtime;
+using ScarletCore.Systems;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 
 namespace ScarletHooks;
 
 public static class ECSExtensions {
-  public static EntityManager EntityManager => Core.Server.EntityManager;
+  public static EntityManager EntityManager => GameSystems.EntityManager;
 
   public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct {
     var componentType = new ComponentType(Il2CppType.Of<T>());

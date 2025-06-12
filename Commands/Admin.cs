@@ -1,14 +1,16 @@
 using VampireCommandFramework;
 using ScarletHooks.Systems;
-using ScarletHooks.Utils;
-using ScarletHooks.Data;
+using ScarletCore.Utils;
+using ScarletCore.Data;
 using System.Collections.Generic;
-using ScarletHooks.Services;
+using ScarletCore.Services;
 
 namespace ScarletHooks.Commands;
 
 [CommandGroup("hooks")]
 public static class AdminCommands {
+  private static Settings Settings => Plugin.Settings;
+
   [Command("add", description: "Add a new clan to the list. The clan name is case-sensitive. If you are unsure, use 'hooks afp' to add from the player's name.", adminOnly: true)]
   public static void Add(ChatCommandContext ctx, string clanName) {
     if (string.IsNullOrEmpty(clanName)) {
@@ -74,7 +76,7 @@ public static class AdminCommands {
 
   [Command("reload settings", description: "Reload all settings.", adminOnly: true)]
   public static void RealodSettings(ChatCommandContext ctx) {
-    Settings.Reload();
+    Plugin.ReloadSettings();
     ctx.Reply("~Settings reloaded.~".Format());
   }
 
@@ -86,7 +88,7 @@ public static class AdminCommands {
 
   [Command("reload", description: "Reload all settings and webhooks.", adminOnly: true)]
   public static void Realod(ChatCommandContext ctx) {
-    Settings.Reload();
+    Plugin.ReloadSettings();
     MessageDispatchSystem.LoadFromFile();
 
     ctx.Reply("~Settings and webhooks reloaded.~".Format());
