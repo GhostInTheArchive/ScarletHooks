@@ -10,6 +10,7 @@ using ScarletRCON.Shared;
 namespace ScarletHooks;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInDependency("markvaaz.ScarletCore")]
 [BepInDependency("markvaaz.ScarletRCON", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("gg.deca.VampireCommandFramework")]
 public class Plugin : BasePlugin {
@@ -35,7 +36,6 @@ public class Plugin : BasePlugin {
     MessageDispatchSystem.Initialize();
     CommandRegistry.RegisterAll();
     RconCommandRegistrar.RegisterAll();
-
   }
 
   public override bool Unload() {
