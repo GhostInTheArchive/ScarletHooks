@@ -19,18 +19,7 @@ ScarletHooks is a V Rising server mod that enables advanced webhook integration 
 
 ---
 
-### For more information, please visit the [ScarletHooks Wiki on Thunderstore](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/).
-
-**Wiki Index:**
-- [Clan Webhooks](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3486-clan-webhooks/)
-- [Commands](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3484-commands/)
-- [Configuration Guide](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3480-configuration-guide/)
-- [FAQ](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3487-faq/)
-- [Features Overview](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3477-features-overview/)
-- [Installation Guide](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3479-installation-guide/)
-- [Placeholders & Message Formatting](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3483-placeholders-message-formatting/)
-- [Troubleshooting](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3482-troubleshooting/)
-- [Webhook Routing & Examples](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/3485-webhook-routing-examples/)
+## For more information, please visit the [ScarletHooks Wiki on Thunderstore](https://thunderstore.io/c/v-rising/p/ScarletMods/ScarletHooks/wiki/).
 
 ---
 
