@@ -98,7 +98,9 @@ public static class MessageDispatchSystem {
         .Replace("{playerName}", killerPlayer.Name)
         .Replace("{targetName}", diedPlayer.Name)
         .Replace("[{clanName}]", $"[{killerPlayer.ClanName}]" ?? "")
-        .Replace("{clanName}", $"{killerPlayer.ClanName}" ?? "");
+        .Replace("{clanName}", $"{killerPlayer.ClanName}" ?? "")
+        .Replace("[{targetClanName}]", $"{diedPlayer.ClanName}" ?? "")
+        .Replace("{targetClanName}", $"{diedPlayer.ClanName}" ?? "");
 
 
       if (Settings.Get<bool>("AdminPvpMessages")) {
