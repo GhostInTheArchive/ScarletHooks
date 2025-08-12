@@ -29,6 +29,7 @@ public class AdminRconCommands {
       return $"Player '{playerName}' not found or does not belong to a clan.";
     }
 
+
     string clanName = playerData.ClanName;
 
     if (MessageDispatchSystem.ClanWebHookUrls.ContainsKey(clanName)) {
