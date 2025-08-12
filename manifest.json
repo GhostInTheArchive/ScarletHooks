@@ -1,11 +1,11 @@
 {
   "name": "ScarletHooks",
-  "version_number": "1.1.0",
+  "version_number": "1.1.1",
   "website_url": "https://github.com/markvaaz/ScarletHooks",
   "description": "Advanced webhook integration for V Rising servers. Send chat, login/logout, PvP kills, and VBlood defeats to Discord. Features admin/public/clan-specific logs with customizable formatting.",
   "dependencies": [
     "BepInEx-BepInExPack_V_Rising-1.733.2",
     "deca-VampireCommandFramework-0.10.2",
-    "ScarletMods-ScarletCore-1.0.0"
+    "ScarletMods-ScarletCore-1.1.20"
   ]
 }
