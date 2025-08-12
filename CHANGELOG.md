@@ -1,3 +1,8 @@
+<details>
+<summary>Update 1.1.2</summary>
+
+- Fixed PvP kill messages so they are dispatched when players are downed.
+</details>
 
 <details>
 <summary>Update 1.1.1</summary>
