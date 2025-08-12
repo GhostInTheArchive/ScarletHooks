@@ -1,3 +1,10 @@
+
+<details>
+<summary>Update 1.1.1</summary>
+
+- Fixed PvP kill messages to correctly display the target player's clan.
+</details>
+
 <details>
 <summary>Update 1.1.0</summary>
 
