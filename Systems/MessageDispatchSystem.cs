@@ -111,10 +111,10 @@ public static class MessageDispatchSystem {
       var resultMessage = format
         .Replace("{playerName}", killerPlayer.Name)
         .Replace("{targetName}", diedPlayer.Name)
-        .Replace("[{clanName}]", $"[{killerPlayer.ClanName}]" ?? "")
-        .Replace("{clanName}", $"{killerPlayer.ClanName}" ?? "")
-        .Replace("[{targetClanName}]", $"{diedPlayer.ClanName}" ?? "")
-        .Replace("{targetClanName}", $"{diedPlayer.ClanName}" ?? "");
+        .Replace("[{clanName}]", string.IsNullOrEmpty(killerPlayer.ClanName) ? "" : $"[{killerPlayer.ClanName}]")
+        .Replace("{clanName}", killerPlayer.ClanName ?? "")
+        .Replace("[{targetClanName}]", string.IsNullOrEmpty(diedPlayer.ClanName) ? "" : $"[{diedPlayer.ClanName}]")
+        .Replace("{targetClanName}", diedPlayer.ClanName ?? "");
 
 
       if (Settings.Get<bool>("AdminPvpMessages")) {
