@@ -6,6 +6,8 @@ using VampireCommandFramework;
 using ScarletCore.Data;
 using ScarletHooks.Systems;
 using ScarletRCON.Shared;
+using System.Reflection;
+using ScarletCore.Events;
 
 namespace ScarletHooks;
 
@@ -26,7 +28,7 @@ public class Plugin : BasePlugin {
     Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} version {MyPluginInfo.PLUGIN_VERSION} is loaded!");
 
     _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
-    _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
+    _harmony.PatchAll(Assembly.GetExecutingAssembly());
 
     Settings = new Settings(MyPluginInfo.PLUGIN_GUID, Instance);
     Database = new Database(MyPluginInfo.PLUGIN_GUID);
@@ -41,6 +43,7 @@ public class Plugin : BasePlugin {
   public override bool Unload() {
     CommandRegistry.UnregisterAssembly();
     RconCommandRegistrar.UnregisterAssembly();
+    EventManager.UnregisterAssembly(Assembly.GetExecutingAssembly());
     _harmony?.UnpatchSelf();
     return true;
   }
@@ -94,7 +97,6 @@ public class Plugin : BasePlugin {
   }
 
   public static void ReloadSettings() {
-    Settings.Dispose();
     LoadSettings();
   }
 }
