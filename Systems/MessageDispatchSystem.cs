@@ -9,12 +9,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using ProjectM;
 using ProjectM.Network;
+using ScarletCore;
 using ScarletCore.Data;
 using ScarletCore.Events;
 using ScarletCore.Services;
 using ScarletCore.Utils;
 using ScarletHooks.Data;
 using Stunlock.Core;
+using Unity.Entities;
 
 namespace ScarletHooks.Systems;
 
@@ -46,7 +48,7 @@ public static class MessageDispatchSystem {
     EventManager.OnUserConnected += HandleConnectionEvent;
     EventManager.OnUserDisconnected += HandleDisconnectionEvent;
     EventManager.OnChatMessage += HandleMessageEvent;
-    EventManager.OnPlayerDeath += HandlePvpDeathEvent;
+    EventManager.OnPlayerDowned += HandlePvpDeathEvent;
     EventManager.OnVBloodDeath += HandleVBloodDeathEvent;
 
     _cts = new CancellationTokenSource();
@@ -76,22 +78,34 @@ public static class MessageDispatchSystem {
     }
   }
 
-  public static void HandlePvpDeathEvent(object _, DeathEventArgs args) {
+  public static void HandlePvpDeathEvent(object _, PlayerDownedEventArgs args) {
     if (args == null || !_isRunning) return;
 
-    var deaths = args.Deaths;
+    var downed = args.DownedEntities;
 
-    foreach (var death in deaths) {
-      var died = death.Died;
-      var killer = death.Killer;
+    foreach (var entity in downed) {
+      var downedBuff = entity.Read<VampireDownedBuff>();
+      var downedOwner = entity.Read<EntityOwner>();
+      Entity killerOwner = Entity.Null;
 
-      if (!died.Has<PlayerCharacter>() || !killer.Has<PlayerCharacter>()) continue;
-
-      if (!PlayerService.TryGetByName(died.Read<PlayerCharacter>().Name.ToString(), out var diedPlayer) ||
-          !PlayerService.TryGetByName(killer.Read<PlayerCharacter>().Name.ToString(), out var killerPlayer)) {
-        return;
+      if (!downedOwner.Owner.Has<PlayerCharacter>()) {
+        continue;
       }
 
+      if (downedBuff.Source != Entity.Null) {
+        killerOwner = downedBuff.Source.Read<EntityOwner>().Owner;
+      }
+
+      if (killerOwner == Entity.Null && downedBuff.SourceSpell != Entity.Null) {
+        killerOwner = downedBuff.SourceSpell.Read<EntityOwner>().Owner;
+      }
+
+      if (!killerOwner.Has<PlayerCharacter>()) {
+        continue;
+      }
+
+      var diedPlayer = downedOwner.Owner.GetPlayerData();
+      var killerPlayer = killerOwner.GetPlayerData();
       var format = Settings.Get<string>("PvpKillMessageFormat");
 
       var resultMessage = format
