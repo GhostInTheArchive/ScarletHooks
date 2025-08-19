@@ -1,4 +1,10 @@
 <details>
+<summary>Update 1.1.3</summary>
+
+- Fixed Login messages not appearing.
+</details>
+
+<details>
 <summary>Update 1.1.2</summary>
 
 - Fixed PvP kill messages so they are dispatched when players are downed.
