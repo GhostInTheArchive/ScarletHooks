@@ -167,8 +167,9 @@ public static class MessageDispatchSystem {
     if (args == null || !_isRunning) return;
     var playerData = args.Player;
     var now = DateTime.UtcNow;
+    var lastConnected = playerData.GetData<DateTime>();
 
-    bool isRecentConnect = (now - playerData.ConnectedSince).TotalSeconds < 10;
+    bool isRecentConnect = (now - lastConnected).TotalSeconds < 10;
     if (!isRecentConnect) {
       HandleLoginMessage(playerData.Name, playerData.ClanName);
     }
