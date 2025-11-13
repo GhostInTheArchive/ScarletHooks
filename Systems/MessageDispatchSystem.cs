@@ -13,9 +13,11 @@ using ScarletCore;
 using ScarletCore.Data;
 using ScarletCore.Events;
 using ScarletCore.Services;
+using ScarletCore.Systems;
 using ScarletCore.Utils;
 using ScarletHooks.Data;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace ScarletHooks.Systems;
@@ -45,11 +47,12 @@ public static class MessageDispatchSystem {
     _isRunning = true;
     LoadFromFile();
 
-    EventManager.OnUserConnected += HandleConnectionEvent;
-    EventManager.OnUserDisconnected += HandleDisconnectionEvent;
-    EventManager.OnChatMessage += HandleMessageEvent;
-    EventManager.OnPlayerDowned += HandlePvpDeathEvent;
-    EventManager.OnVBloodDeath += HandleVBloodDeathEvent;
+    EventManager.On(PlayerEvents.PlayerJoined, HandleConnectionEvent);
+    EventManager.On(PlayerEvents.PlayerLeft, HandleDisconnectionEvent);
+    EventManager.On(PrefixEvents.OnChatMessage, HandleMessageEvent);
+    EventManager.On(PrefixEvents.OnPlayerDowned, HandlePvpDeathEvent);
+    // EventManager.OnVBloodDeath += HandleVBloodDeathEvent;
+    EventManager.On(PrefixEvents.OnDeath, HandleVBloodDeathEvent);
 
     _cts = new CancellationTokenSource();
     _ = Task.Run(() => ProcessQueueLoop(_cts.Token));
@@ -78,12 +81,10 @@ public static class MessageDispatchSystem {
     }
   }
 
-  public static void HandlePvpDeathEvent(object _, PlayerDownedEventArgs args) {
-    if (args == null || !_isRunning) return;
+  public static void HandlePvpDeathEvent(NativeArray<Entity> entities) {
+    if (!_isRunning) return;
 
-    var downed = args.DownedEntities;
-
-    foreach (var entity in downed) {
+    foreach (var entity in entities) {
       var downedBuff = entity.Read<VampireDownedBuff>();
       var downedOwner = entity.Read<EntityOwner>();
       Entity killerOwner = Entity.Null;
@@ -129,22 +130,21 @@ public static class MessageDispatchSystem {
     }
   }
 
-  public static void HandleVBloodDeathEvent(object _, DeathEventArgs args) {
-    if (args == null || !_isRunning) return;
+  public static void HandleVBloodDeathEvent(NativeArray<Entity> entities) {
+    if (!_isRunning) return;
 
-    var deaths = args.Deaths;
+    foreach (var entity in entities) {
+      var deathEvent = entity.Read<DeathEvent>();
 
-    foreach (var death in deaths) {
-      var died = death.Died;
-      var killer = death.Killer;
+      var died = deathEvent.Died;
+      var killer = deathEvent.Killer;
 
-      if (!killer.Has<PlayerCharacter>()) continue;
+      if (!killer.Has<PlayerCharacter>() || !died.Has<VBloodUnit>()) continue;
 
-      if (!PlayerService.TryGetByName(killer.Read<PlayerCharacter>().Name.ToString(), out var killerPlayer)) {
-        return;
-      }
+      var killerPlayer = killer.GetPlayerData();
 
-      var vBloodName = VBloods.Names[died.Read<PrefabGUID>().GuidHash];
+      if (!VBloods.Names.TryGetValue(died.GetGuidHash(), out var vBloodName)) continue;
+
       var format = Settings.Get<string>("VBloodDeathMessageFormat");
 
       var resultMessage = format
@@ -163,9 +163,8 @@ public static class MessageDispatchSystem {
     }
   }
 
-  private static void HandleConnectionEvent(object _, UserConnectedEventArgs args) {
-    if (args == null || !_isRunning) return;
-    var playerData = args.Player;
+  private static void HandleConnectionEvent(PlayerData playerData) {
+    if (!_isRunning) return;
     var now = DateTime.UtcNow;
     var lastConnected = playerData.GetData<DateTime>();
 
@@ -177,8 +176,7 @@ public static class MessageDispatchSystem {
     playerData.SetData(now);
   }
 
-  private static void HandleDisconnectionEvent(object _, UserDisconnectedEventArgs args) {
-    var playerData = args.Player;
+  private static void HandleDisconnectionEvent(PlayerData playerData) {
     var now = DateTime.UtcNow;
     var disconnectedSince = playerData.GetData<DateTime>();
 
@@ -189,12 +187,23 @@ public static class MessageDispatchSystem {
     }
   }
 
-  public static void HandleMessageEvent(object _, ChatMessageEventArgs args) {
-    if (args == null || !_isRunning) return;
+  public static void HandleMessageEvent(NativeArray<Entity> entities) {
+    foreach (var entity in entities) {
+      var character = entity.Read<FromCharacter>().Character;
+      var messageEvent = entity.Read<ChatMessageEvent>();
+      var message = messageEvent.MessageText.Value;
+      var sender = character.GetPlayerData();
+      var messageType = messageEvent.MessageType;
+      PlayerData receiver = null;
 
-    if (string.IsNullOrEmpty(args.Message) || string.IsNullOrEmpty(args.Sender.Name)) return;
+      if (GameSystems.NetworkIdSystem._NetworkIdLookupMap.TryGetValue(messageEvent.ReceiverEntity, out var receiverEntity)) {
+        receiver = receiverEntity.GetPlayerData();
+      }
 
-    HandleMessage(args.Message, args.Sender.Name, args.MessageType, args.Sender.ClanName, args.Receiver?.Name);
+      if (string.IsNullOrEmpty(message) || string.IsNullOrEmpty(sender.Name)) return;
+
+      HandleMessage(message, sender.Name, messageType, sender.ClanName, receiver?.Name);
+    }
   }
 
   private static void HandleMessage(string content, string playerName, ChatMessageType messageType, string clanName, string targetName) {

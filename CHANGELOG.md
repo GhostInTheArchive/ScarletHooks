@@ -1,4 +1,10 @@
 <details>
+<summary>Update 1.1.4</summary>
+
+- Updated compatibility with the latest ScarletCore version.
+</details>
+
+<details>
 <summary>Update 1.1.3</summary>
 
 - Fixed Login messages not appearing.
